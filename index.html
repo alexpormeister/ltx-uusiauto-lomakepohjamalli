@@ -16,9 +16,19 @@
   }
   body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.6; -webkit-font-smoothing: antialiased; }
   .page { max-width: 720px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
-  .hero { text-align: center; margin-bottom: 2.5rem; }
+  .hero { text-align: center; margin-bottom: 1.5rem; }
   .hero h1 { font-family: 'DM Serif Display', serif; font-size: 2.1rem; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
   .hero p { color: var(--muted); font-size: 0.92rem; max-width: 440px; margin: 0 auto; }
+  .courses { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem 1.1rem; margin-top: 1.5rem; }
+  .courses h2 { font-size: 0.75rem; font-weight: 600; color: var(--faint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
+  .course-row { display: grid; grid-template-columns: 74px 1fr auto; gap: 2px 12px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--border); font-size: 0.82rem; }
+  .course-row:first-of-type { border-top: none; }
+  .c-tag { font-size: 0.66rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .c-tag.etela { color: var(--blue-text); }
+  .c-tag.lappi { color: var(--success); }
+  .c-name { font-weight: 600; }
+  .c-when { color: var(--muted); font-size: 0.78rem; white-space: nowrap; text-align: right; }
+  .c-desc { grid-column: 2 / -1; color: var(--muted); font-size: 0.75rem; line-height: 1.45; }
   .form-wrapper { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 2rem; overflow: hidden; }
   .form-title { font-family: 'DM Serif Display', serif; font-size: 1.5rem; font-weight: 400; margin-bottom: 1.5rem; }
   .progress { display: flex; gap: 6px; margin-bottom: 2rem; }
@@ -41,6 +51,18 @@
   .field input::placeholder { color: var(--faint); }
   .field .field-error { font-size: 0.75rem; color: var(--danger); margin-top: 3px; display: none; }
   .field input.invalid { border-color: var(--danger); }
+  .region-group { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 10px auto 0; max-width: 480px; }
+  .region-tile { position: relative; display: flex !important; flex-direction: column; aspect-ratio: 1 / 1; border: 2px solid var(--border); border-radius: 12px; overflow: hidden; cursor: pointer; background: var(--card); margin-bottom: 0 !important; transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s; }
+  .region-tile:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+  .region-tile input { position: absolute; opacity: 0; pointer-events: none; }
+  .region-tile svg { display: block; width: 100%; flex: 1; min-height: 0; }
+  .region-tile .tile-name { padding: 10px 8px; text-align: center; font-size: 0.92rem !important; font-weight: 600; color: var(--ink); border-top: 1px solid var(--border); }
+  .region-tile .tile-check { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: var(--ink); font-size: 0.8rem; font-weight: 700; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+  .region-tile:has(input:checked) { border-color: var(--accent-dark); box-shadow: 0 0 0 3px var(--accent-bg); }
+  .region-tile:has(input:checked) .tile-name { background: var(--accent-bg); }
+  .region-tile:has(input:checked) .tile-check { display: flex; }
+  .region-tile:has(input:focus-visible) { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .region-group.invalid .region-tile { border-color: var(--danger); }
   .phone-row { display: grid; grid-template-columns: 90px 1fr; gap: 8px; }
   .custom-select { position: relative; }
   .custom-select-trigger { display: flex; align-items: center; gap: 6px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); cursor: pointer; font-size: 0.85rem; font-family: inherit; color: var(--ink); transition: border-color 0.15s; user-select: none; }
@@ -101,6 +123,10 @@
   @media (max-width: 540px) {
     .page { padding: 1.5rem 1rem 3rem; }
     .row-2 { grid-template-columns: 1fr; }
+    .course-row { grid-template-columns: 1fr; }
+    .c-when { text-align: left; }
+    .c-desc { grid-column: 1; }
+    .region-group { grid-template-columns: 1fr; }
     .form-wrapper { padding: 1.3rem; }
     .hero h1 { font-size: 1.6rem; }
     .license-example { flex-direction: column; align-items: center; }
@@ -116,17 +142,81 @@
     <h1>Taksinkuljettajakurssit</h1>
     <p>Ilmoittaudu kurssille alla olevalla lomakkeella.</p>
   </div>
-
+ 
   <div class="form-wrapper">
     <h2 class="form-title">Ilmoittautuminen</h2>
     <div class="progress" id="progress-bar"></div>
-
-    <div class="step active" id="step-0">
+ 
+    <div class="step active" id="step-5">
+      <div class="step-label" id="label-5"></div>
+      <div class="step-title">Koulutusalue</div>
+      <div class="field">
+        <label>Valitse, mihin koulutuksiin ilmoittaudut</label>
+        <div class="region-group" id="region-group">
+          <label class="region-tile">
+            <input type="radio" name="region" value="etela-suomi">
+            <span class="tile-check">&#10003;</span>
+            <svg viewBox="0 0 200 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect width="200" height="150" fill="#cfe6f7"/>
+              <circle cx="155" cy="35" r="16" fill="#FFD200"/>
+              <path d="M0 95 L200 95 L200 150 L0 150 Z" fill="#3a7fc1"/>
+              <path d="M0 105 Q25 100 50 105 T100 105 T150 105 T200 105" stroke="#8fc0ea" stroke-width="2" fill="none"/>
+              <path d="M0 120 Q25 115 50 120 T100 120 T150 120 T200 120" stroke="#8fc0ea" stroke-width="2" fill="none"/>
+              <rect x="20" y="55" width="22" height="40" fill="#e8e3d6"/>
+              <rect x="46" y="40" width="26" height="55" fill="#f4efe3"/>
+              <rect x="76" y="62" width="20" height="33" fill="#e0d9c8"/>
+              <path d="M46 40 L59 26 L72 40 Z" fill="#2f6b4f"/>
+              <rect x="56" y="18" width="6" height="10" fill="#2f6b4f"/>
+              <g fill="#7d9cba"><rect x="25" y="62" width="5" height="6"/><rect x="33" y="62" width="5" height="6"/><rect x="25" y="74" width="5" height="6"/><rect x="33" y="74" width="5" height="6"/><rect x="51" y="50" width="5" height="7"/><rect x="62" y="50" width="5" height="7"/><rect x="51" y="64" width="5" height="7"/><rect x="62" y="64" width="5" height="7"/><rect x="80" y="70" width="5" height="6"/><rect x="88" y="70" width="5" height="6"/></g>
+              <rect x="140" y="58" width="10" height="37" fill="#fff"/>
+              <rect x="140" y="66" width="10" height="6" fill="#c53030"/>
+              <rect x="140" y="80" width="10" height="6" fill="#c53030"/>
+              <path d="M137 58 L153 58 L145 48 Z" fill="#c53030"/>
+              <path d="M110 108 L134 108 L130 114 L114 114 Z" fill="#fff"/>
+              <path d="M122 108 L122 92 L132 106 Z" fill="#fff"/>
+            </svg>
+            <span class="tile-name">Etelä-Suomi</span>
+          </label>
+          <label class="region-tile">
+            <input type="radio" name="region" value="lappi">
+            <span class="tile-check">&#10003;</span>
+            <svg viewBox="0 0 200 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect width="200" height="150" fill="#14213d"/>
+              <path d="M0 40 Q50 10 100 35 T200 25" stroke="#4ade80" stroke-width="10" fill="none" opacity="0.55"/>
+              <path d="M0 55 Q60 25 110 50 T200 40" stroke="#22d3ee" stroke-width="6" fill="none" opacity="0.4"/>
+              <g fill="#fff"><circle cx="30" cy="20" r="1.2"/><circle cx="80" cy="12" r="1"/><circle cx="140" cy="15" r="1.3"/><circle cx="175" cy="55" r="1"/><circle cx="60" cy="65" r="1"/><circle cx="120" cy="70" r="1.2"/></g>
+              <path d="M-10 110 L45 70 L80 95 L120 60 L170 98 L210 80 L210 150 L-10 150 Z" fill="#cbd5e1"/>
+              <path d="M45 70 L35 78 L52 77 Z M120 60 L108 70 L130 69 Z" fill="#fff"/>
+              <path d="M-10 125 L210 118 L210 150 L-10 150 Z" fill="#f1f5f9"/>
+              <g fill="#1e3a2f">
+                <path d="M25 128 L33 100 L41 128 Z"/><path d="M27 118 L33 95 L39 118 Z"/>
+                <path d="M150 126 L159 96 L168 126 Z"/><path d="M152 115 L159 90 L166 115 Z"/>
+                <path d="M172 128 L178 108 L184 128 Z"/>
+              </g>
+              <g fill="#fff"><path d="M27 128 L33 112 L39 128 Z" opacity="0.5"/><path d="M152 126 L159 108 L166 126 Z" opacity="0.5"/></g>
+            </svg>
+            <span class="tile-name">Lappi</span>
+          </label>
+        </div>
+        <div class="field-error" id="err-region">Valitse koulutusalue</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-prev btn-hidden">Edellinen</button>
+        <button class="btn btn-next" onclick="nextStep()">Seuraava</button>
+      </div>
+    </div>
+ 
+    <div class="step" id="step-0">
       <div class="step-label" id="label-0"></div>
       <div class="step-title">Henkilötiedot</div>
       <div class="row row-2">
         <div class="field"><label>Etunimi</label><input type="text" id="fname" placeholder="Matti"><div class="field-error" id="err-fname">Syötä etunimi</div></div>
         <div class="field"><label>Sukunimi</label><input type="text" id="lname" placeholder="Meikäläinen"><div class="field-error" id="err-lname">Syötä sukunimi</div></div>
+      </div>
+      <div class="field">
+        <label>Henkilötunnus</label>
+        <input type="text" id="hetu" placeholder="010190-123A" maxlength="11" autocomplete="off" style="text-transform:uppercase;">
+        <div class="field-error" id="err-hetu">Syötä kelvollinen henkilötunnus (esim. 010190-123A)</div>
       </div>
       <div class="field">
         <label>Puhelinnumero</label>
@@ -154,11 +244,11 @@
         <div class="field"><label>Postitoimipaikka</label><input type="text" id="city" placeholder="Helsinki"><div class="field-error" id="err-city">Syötä postitoimipaikka</div></div>
       </div>
       <div class="btn-row">
-        <button class="btn btn-prev btn-hidden">Edellinen</button>
+        <button class="btn btn-prev" onclick="prevStep()">Edellinen</button>
         <button class="btn btn-next" onclick="nextStep()">Seuraava</button>
       </div>
     </div>
-
+ 
     <div class="step" id="step-1">
       <div class="step-label" id="label-1"></div>
       <div class="step-title">Lisätiedot</div>
@@ -187,7 +277,7 @@
         <button class="btn btn-next" onclick="nextStep()">Seuraava</button>
       </div>
     </div>
-
+ 
     <div class="step" id="step-2">
       <div class="step-label" id="label-2"></div>
       <div class="step-title">Taksinkuljettajan ajolupa</div>
@@ -225,7 +315,7 @@
         <button class="btn btn-next" onclick="nextStep()">Seuraava</button>
       </div>
     </div>
-
+ 
     <div class="step" id="step-3">
       <div class="step-label" id="label-3"></div>
       <div class="step-title">Traficomin ammattipätevyysote</div>
@@ -248,7 +338,7 @@
         <button class="btn btn-next" onclick="nextStep()">Seuraava</button>
       </div>
     </div>
-
+ 
     <div class="step" id="step-4">
       <div class="step-label" id="label-4"></div>
       <div class="step-title">Yhteenveto ja lähetys</div>
@@ -266,19 +356,27 @@
       <div class="msg" id="msg-submit"></div>
     </div>
   </div>
+ 
+  <section class="courses">
+    <h2>Tulevat kurssit</h2>
+    <div class="course-row"><span class="c-tag etela">Etelä-Suomi</span><span class="c-name">Taksinkuljettajan peruskurssi</span><span class="c-when">16.-20.11.2026 · Helsinki</span><span class="c-desc">ma-pe 9-16. Valmistaa ajolupakokeeseen: lainsäädäntö, asiakaspalvelu, turvallisuus.</span></div>
+    <div class="course-row"><span class="c-tag lappi">Lappi</span><span class="c-name">Taksinkuljettajan peruskurssi</span><span class="c-when">30.11.-4.12.2026 · Rovaniemi</span><span class="c-desc">ma-pe 9-16. Mukana talviajo ja pitkät kuljetusmatkat.</span></div>
+    <div class="course-row"><span class="c-tag etela">Etelä-Suomi</span><span class="c-name">Esteettömän kuljetuksen kurssi</span><span class="c-when">12.-13.1.2027 · Espoo</span><span class="c-desc">klo 9-15. Pyörätuoliasiakkaat, porrasveto ja apuvälineiden kiinnitys.</span></div>
+    <div class="course-row"><span class="c-tag lappi">Lappi</span><span class="c-name">Matkailukuljetusten kurssi</span><span class="c-when">26.-27.1.2027 · Levi</span><span class="c-desc">klo 10-16. Matkailijoiden palvelu ja lentokenttäkuljetukset.</span></div>
+  </section>
 </div>
-
+ 
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <span class="lightbox-close">&times;</span>
   <img id="lightbox-img" src="" alt="Suurennettu kuva">
 </div>
-
+ 
 <script>
-var currentStep = 0;
+var currentStep = 5;
 var hasLicense = false;
 // Demo-ohitus: 1. klikkaus näyttää virheet, 2. klikkaus samassa vaiheessa ohittaa ne
 var skipArmed = false;
-
+ 
 var countries = [
   { code: "+358", name: "Suomi", flag: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 24'%3E%3Crect width='36' height='24' fill='%23fff'/%3E%3Crect y='9' width='36' height='6' fill='%23003580'/%3E%3Crect x='10' width='6' height='24' fill='%23003580'/%3E%3C/svg%3E" },
   { code: "+46", name: "Ruotsi", flag: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 24'%3E%3Crect width='36' height='24' fill='%23006AA7'/%3E%3Crect y='9' width='36' height='6' fill='%23FECC00'/%3E%3Crect x='10' width='6' height='24' fill='%23FECC00'/%3E%3C/svg%3E" },
@@ -291,7 +389,9 @@ var countries = [
   { code: "+44", name: "Britannia", flag: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 24'%3E%3Crect width='36' height='24' fill='%23012169'/%3E%3Cpath d='M0,0 L36,24 M36,0 L0,24' stroke='%23fff' stroke-width='4'/%3E%3Cpath d='M0,0 L36,24 M36,0 L0,24' stroke='%23C8102E' stroke-width='2'/%3E%3Crect y='9' width='36' height='6' fill='%23fff'/%3E%3Crect x='14' width='8' height='24' fill='%23fff'/%3E%3Crect y='10' width='36' height='4' fill='%23C8102E'/%3E%3Crect x='15' width='6' height='24' fill='%23C8102E'/%3E%3C/svg%3E" },
   { code: "+1", name: "USA", flag: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 24'%3E%3Crect width='36' height='24' fill='%23fff'/%3E%3Cg fill='%23B22234'%3E%3Crect width='36' height='1.85'/%3E%3Crect y='3.7' width='36' height='1.85'/%3E%3Crect y='7.4' width='36' height='1.85'/%3E%3Crect y='11.1' width='36' height='1.85'/%3E%3Crect y='14.8' width='36' height='1.85'/%3E%3Crect y='18.5' width='36' height='1.85'/%3E%3Crect y='22.2' width='36' height='1.85'/%3E%3C/g%3E%3Crect width='14.4' height='12.9' fill='%233C3B6E'/%3E%3C/svg%3E" }
 ];
-
+ 
+var regionNames = { 'etela-suomi': 'Etelä-Suomen koulutukset', 'lappi': 'Lapin koulutukset' };
+ 
 function buildPhoneDropdown() {
   var container = document.getElementById('phone-options');
   container.innerHTML = '';
@@ -303,7 +403,7 @@ function buildPhoneDropdown() {
     container.appendChild(div);
   });
 }
-
+ 
 function selectCountry(c, el) {
   document.getElementById('selected-code').textContent = c.code;
   document.getElementById('phone-code').value = c.code;
@@ -311,17 +411,17 @@ function selectCountry(c, el) {
   el.classList.add('active');
   closeDropdown();
 }
-
+ 
 function toggleDropdown() { document.getElementById('phone-options').classList.toggle('open'); }
 function closeDropdown() { document.getElementById('phone-options').classList.remove('open'); }
 document.addEventListener('click', function(e) {
   if (!e.target.closest('#phone-select')) closeDropdown();
 });
-
+ 
 function getStepOrder() {
-  return hasLicense ? [0,1,2,3,4] : [0,1,2,4];
+  return hasLicense ? [5,0,1,2,3,4] : [5,0,1,2,4];
 }
-
+ 
 function updateProgress() {
   var order = getStepOrder();
   var total = order.length;
@@ -333,7 +433,7 @@ function updateProgress() {
     dot.className = 'progress-dot' + (i < idx ? ' done' : '') + (i === idx ? ' active' : '');
     bar.appendChild(dot);
   }
-  for (var s = 0; s < 5; s++) {
+  for (var s = 0; s < 6; s++) {
     var lbl = document.getElementById('label-' + s);
     if (lbl) {
       var si = order.indexOf(s);
@@ -341,27 +441,51 @@ function updateProgress() {
     }
   }
 }
-
+ 
 function showStep(n) {
-  for (var i = 0; i < 5; i++) document.getElementById('step-' + i).classList.remove('active');
+  for (var i = 0; i < 6; i++) document.getElementById('step-' + i).classList.remove('active');
   document.getElementById('step-' + n).classList.add('active');
   currentStep = n;
   skipArmed = false;
   updateProgress();
   window.scrollTo({ top: document.querySelector('.form-wrapper').offsetTop - 20, behavior: 'smooth' });
 }
-
+ 
+// Henkilötunnuksen tarkistus: muoto PPKKVV-NNNT ja tarkistemerkki
+function isValidHetu(v) {
+  var s = v.trim().toUpperCase();
+  var m = /^(\d{2})(\d{2})(\d{2})([-+ABCDEFYXWVU])(\d{3})([0-9A-Y])$/.exec(s);
+  if (!m) return false;
+  var day = parseInt(m[1], 10), month = parseInt(m[2], 10);
+  if (day < 1 || day > 31 || month < 1 || month > 12) return false;
+  var checks = '0123456789ABCDEFHJKLMNPRSTUVWXY';
+  var num = parseInt(m[1] + m[2] + m[3] + m[5], 10);
+  return checks.charAt(num % 31) === m[6];
+}
+ 
 var validators = {
   fname: function(v) { return v.trim().length > 0; },
   lname: function(v) { return v.trim().length > 0; },
+  hetu: isValidHetu,
   phone: function(v) { return /^[0-9\s]{5,15}$/.test(v.trim()); },
   email: function(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()); },
   address: function(v) { return v.trim().length > 0; },
   zip: function(v) { return /^[0-9]{5}$/.test(v.trim()); },
   city: function(v) { return v.trim().length > 0; }
 };
-var step0Fields = ['fname','lname','phone','email','address','zip','city'];
-
+var step0Fields = ['fname','lname','hetu','phone','email','address','zip','city'];
+ 
+function setRegionError(show) {
+  document.getElementById('region-group').classList.toggle('invalid', show);
+  document.getElementById('err-region').style.display = show ? 'block' : 'none';
+}
+ 
+function validateRegion() {
+  var regionOk = !!document.querySelector('input[name="region"]:checked');
+  setRegionError(!regionOk);
+  return regionOk;
+}
+ 
 function validateStep0() {
   var ok = true;
   step0Fields.forEach(function(id) {
@@ -375,25 +499,27 @@ function validateStep0() {
   });
   return ok;
 }
-
+ 
 function clearStep0Errors() {
   step0Fields.forEach(function(id) {
     document.getElementById(id).classList.remove('invalid');
     document.getElementById('err-' + id).style.display = 'none';
   });
 }
-
+ 
 function validateStep(n) {
   if (n === 0) return validateStep0();
+  if (n === 5) return validateRegion();
   return true;
 }
-
+ 
 function nextStep() {
   var order = getStepOrder();
   var idx = order.indexOf(currentStep);
   if (!validateStep(currentStep)) {
     if (!skipArmed) { skipArmed = true; return; }
     if (currentStep === 0) clearStep0Errors();
+    if (currentStep === 5) setRegionError(false);
   }
   if (idx < order.length - 1) {
     var next = order[idx + 1];
@@ -401,23 +527,23 @@ function nextStep() {
     showStep(next);
   }
 }
-
+ 
 function prevStep() {
   var order = getStepOrder();
   var idx = order.indexOf(currentStep);
   if (idx > 0) showStep(order[idx - 1]);
 }
-
+ 
 function toggleLicense(show) {
   hasLicense = show;
   document.getElementById('license-section').classList.toggle('visible', show);
   updateProgress();
 }
-
+ 
 function showFileName(input, targetId) {
   document.getElementById(targetId).textContent = input.files.length ? input.files[0].name : '';
 }
-
+ 
 function openLightbox(src) {
   document.getElementById('lightbox-img').src = src;
   document.getElementById('lightbox').classList.add('open');
@@ -426,12 +552,12 @@ function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
 }
 document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
-
+ 
 function getRadio(name) {
   var el = document.querySelector('input[name="' + name + '"]:checked');
   return el ? el.value : '-';
 }
-
+ 
 function buildSummary() {
   var g = function(id) { return document.getElementById(id).value.trim() || '-'; };
   var langs = [];
@@ -439,7 +565,9 @@ function buildSummary() {
   if (document.getElementById('lang-en').checked) langs.push('Englanti');
   var phoneCode = document.getElementById('phone-code').value;
   var rows = [
+    ['Koulutusalue', regionNames[getRadio('region')] || '-'],
     ['Nimi', g('fname') + ' ' + g('lname')],
+    ['Henkilötunnus', g('hetu').toUpperCase()],
     ['Puhelin', phoneCode + ' ' + g('phone')],
     ['Sähköposti', g('email')],
     ['Osoite', g('address') + ', ' + g('zip') + ' ' + g('city')],
@@ -457,7 +585,7 @@ function buildSummary() {
   rows.forEach(function(r) { html += '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'; });
   document.getElementById('summary-table').innerHTML = html;
 }
-
+ 
 function handleSubmit() {
   var name = document.getElementById('fname').value.trim();
   document.querySelector('.form-wrapper').innerHTML = '<div style="text-align:center; padding: 3rem 1rem;">' +
@@ -467,7 +595,7 @@ function handleSubmit() {
     '<p style="color:#6b6b6b; font-size:0.85rem;">Vahvistus lähetetään antamaasi sähköpostiosoitteeseen.</p>' +
     '</div>';
 }
-
+ 
 document.querySelectorAll('#step-0 input').forEach(function(input) {
   input.addEventListener('input', function() {
     var err = document.getElementById('err-' + this.id);
@@ -476,7 +604,11 @@ document.querySelectorAll('#step-0 input').forEach(function(input) {
     }
   });
 });
-
+ 
+document.querySelectorAll('input[name="region"]').forEach(function(r) {
+  r.addEventListener('change', function() { setRegionError(false); });
+});
+ 
 buildPhoneDropdown();
 updateProgress();
 </script>
