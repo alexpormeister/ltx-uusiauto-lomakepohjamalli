@@ -214,11 +214,6 @@
         <div class="field"><label>Sukunimi</label><input type="text" id="lname" placeholder="Meikäläinen"><div class="field-error" id="err-lname">Syötä sukunimi</div></div>
       </div>
       <div class="field">
-        <label>Henkilötunnus</label>
-        <input type="text" id="hetu" placeholder="010190-123A" maxlength="11" autocomplete="off" style="text-transform:uppercase;">
-        <div class="field-error" id="err-hetu">Syötä kelvollinen henkilötunnus (esim. 010190-123A)</div>
-      </div>
-      <div class="field">
         <label>Puhelinnumero</label>
         <div class="phone-row">
           <div class="custom-select" id="phone-select">
@@ -451,29 +446,16 @@ function showStep(n) {
   window.scrollTo({ top: document.querySelector('.form-wrapper').offsetTop - 20, behavior: 'smooth' });
 }
  
-// Henkilötunnuksen tarkistus: muoto PPKKVV-NNNT ja tarkistemerkki
-function isValidHetu(v) {
-  var s = v.trim().toUpperCase();
-  var m = /^(\d{2})(\d{2})(\d{2})([-+ABCDEFYXWVU])(\d{3})([0-9A-Y])$/.exec(s);
-  if (!m) return false;
-  var day = parseInt(m[1], 10), month = parseInt(m[2], 10);
-  if (day < 1 || day > 31 || month < 1 || month > 12) return false;
-  var checks = '0123456789ABCDEFHJKLMNPRSTUVWXY';
-  var num = parseInt(m[1] + m[2] + m[3] + m[5], 10);
-  return checks.charAt(num % 31) === m[6];
-}
- 
 var validators = {
   fname: function(v) { return v.trim().length > 0; },
   lname: function(v) { return v.trim().length > 0; },
-  hetu: isValidHetu,
   phone: function(v) { return /^[0-9\s]{5,15}$/.test(v.trim()); },
   email: function(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()); },
   address: function(v) { return v.trim().length > 0; },
   zip: function(v) { return /^[0-9]{5}$/.test(v.trim()); },
   city: function(v) { return v.trim().length > 0; }
 };
-var step0Fields = ['fname','lname','hetu','phone','email','address','zip','city'];
+var step0Fields = ['fname','lname','phone','email','address','zip','city'];
  
 function setRegionError(show) {
   document.getElementById('region-group').classList.toggle('invalid', show);
@@ -567,7 +549,6 @@ function buildSummary() {
   var rows = [
     ['Koulutusalue', regionNames[getRadio('region')] || '-'],
     ['Nimi', g('fname') + ' ' + g('lname')],
-    ['Henkilötunnus', g('hetu').toUpperCase()],
     ['Puhelin', phoneCode + ' ' + g('phone')],
     ['Sähköposti', g('email')],
     ['Osoite', g('address') + ', ' + g('zip') + ' ' + g('city')],
